@@ -1,10 +1,3 @@
-//
-//  PointsView.swift
-//  Points Watch App
-//
-//  Created by Danrui Wang on 5/9/24.
-//
-
 import SwiftUI
 
 struct PointsView: View {
@@ -14,13 +7,16 @@ struct PointsView: View {
     @State private var pointsP2 = 0
     @State private var setsP1 = 0
     @State private var setsP2 = 0
-    @State private var actionHistory: [(pointsP1: Int, pointsP2: Int, setsP1: Int, setsP2: Int)] = [] // List to store both points and sets
+    @State private var actionHistory: [(pointsP1: Int, pointsP2: Int, setsP1: Int, setsP2: Int)] = []
+    
+    @State private var animateP1 = false
+    @State private var animateP2 = false
 
     var maxPoints: Int {
         switch sport {
         case "Badminton": return 21
         case "Squash", "Ping Pong": return 11
-        case "Tennis", "Padel": return 4 // For 0, 15, 30, 40, then game
+        case "Tennis", "Padel": return 4
         default: return 10
         }
     }
@@ -28,7 +24,7 @@ struct PointsView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Text("Sets \(setsP1) : \(setsP2)") // Simplified display for sets
+                Text("Sets \(setsP1) : \(setsP2)")
                     .font(.title2)
                     .padding()
 
@@ -37,33 +33,53 @@ struct PointsView: View {
                         Text("P1: \(displayScore(points: pointsP1))")
                             .font(.title2)
 
-                        Button(action: { incrementP1() }) {
+                        Button(action: {}) {
                             Text("+")
                                 .font(.largeTitle)
                                 .frame(width: 40, height: 40)
                         }
+                        .scaleEffect(animateP1 ? 1.2 : 1.0)
+                        .animation(.easeInOut(duration: 0.1), value: animateP1)
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 1.0)
+                                .onEnded { _ in
+                                    incrementP1()
+                                    provideHapticFeedback()
+                                    animateButton(for: .p1)
+                                }
+                        )
                     }
                     VStack {
                         Text("P2: \(displayScore(points: pointsP2))")
                             .font(.title2)
 
-                        Button(action: { incrementP2() }) {
+                        Button(action: {}) {
                             Text("+")
                                 .font(.largeTitle)
                                 .frame(width: 40, height: 40)
                         }
+                        .scaleEffect(animateP2 ? 1.2 : 1.0)
+                        .animation(.easeInOut(duration: 0.1), value: animateP2)
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 1.0)
+                                .onEnded { _ in
+                                    incrementP2()
+                                    provideHapticFeedback()
+                                    animateButton(for: .p2)
+                                }
+                        )
                     }
                 }
                 .padding()
 
                 Button(action: redoLastAction) {
-                    Text("Redo")
+                    Text("Undo")
                         .foregroundColor(.orange)
                 }
                 .padding()
 
                 Button(action: resetMatch) {
-                    Text("Reset")
+                    Text("Finish")
                         .foregroundColor(.red)
                 }
                 .padding()
@@ -71,6 +87,35 @@ struct PointsView: View {
         }
         .navigationTitle("\(sport)")
     }
+    
+    
+
+    private func provideHapticFeedback() {
+        WKInterfaceDevice.current().play(.success)
+    }
+
+    private func animateButton(for player: Player) {
+        switch player {
+        case .p1:
+            animateP1 = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                animateP1 = false
+            }
+        case .p2:
+            animateP2 = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                animateP2 = false
+            }
+        }
+    }
+    
+    
+    
+
+    private enum Player {
+        case p1, p2
+    }
+
 
     // Score display function for Tennis, Padel, and other sports
     func displayScore(points: Int) -> String {

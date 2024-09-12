@@ -2,7 +2,7 @@
 //  Points_Watch_AppTests.swift
 //  Points Watch AppTests
 //
-//  Created by Danrui Wang on 5/9/24.
+//  Created by Juan Luengo on 11/9/24.
 //
 
 import XCTest
