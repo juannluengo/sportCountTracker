@@ -27,7 +27,7 @@ struct PointsView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Text("Sets \(setsP1) : \(setsP2)")
+                Text("\(setsP1) : \(setsP2)")
                     .font(.title2)
                     .padding()
 
@@ -123,7 +123,7 @@ struct PointsView: View {
                 .padding()
             }
         }
-        .navigationTitle("\(sport)")
+        // .navigationTitle("\(sport)")
     }
 
     private func provideHapticFeedback() {
