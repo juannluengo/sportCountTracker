@@ -1,10 +1,3 @@
-//
-//  HistoryView.swift
-//  Points Watch App
-//
-//  Created by Danrui Wang on 5/9/24.
-//
-
 import SwiftUI
 
 struct HistoryView: View {

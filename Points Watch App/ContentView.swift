@@ -1,21 +1,14 @@
-//
-//  ContentView.swift
-//  Points Watch App
-//
-//  Created by Danrui Wang on 5/9/24 .
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel"]
+    var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "PickleBall", "Basketball", "Soccer", "Volleyball", "Golf", "Cricket", "Racquetball", "Bowling", "Darts", "Hockey", "Rugby", "American Football", "Baseball", "Softball", "Handball", "Table Football", "Lacrosse", "Ultimate Frisbee", "Water Polo", "Field Hockey"]
 
     var body: some View {
-        NavigationView { // Wrap content in a NavigationView to enable navigation
+        NavigationView {
             ScrollView {
                 VStack {
                     Text("Select Sport")
-                        .font(.headline) // Smaller font size as per your request
+                        .font(.headline)
                         .padding()
 
                     ForEach(sports, id: \.self) { sport in
@@ -24,7 +17,7 @@ struct ContentView: View {
                                 .font(.headline)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.blue)
+                                .background(Color.green)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                         }
@@ -36,14 +29,24 @@ struct ContentView: View {
                             .font(.headline)
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(Color.green)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+
+                    NavigationLink(destination: SettingsView()) {
+                        Text("Settings")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.gray)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
                 }
                 .padding()
             }
-            .navigationBarHidden(true) // Hides the default navigation bar
+            .navigationBarHidden(true)
         }
     }
 }
