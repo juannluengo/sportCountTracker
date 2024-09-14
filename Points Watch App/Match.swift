@@ -1,10 +1,3 @@
-//
-//  Match.swift
-//  Points Watch App
-//
-//  Created by Danrui Wang on 5/9/24.
-//
-
 import Foundation
 
 struct Match: Identifiable {

@@ -11,6 +11,9 @@ struct PointsView: View {
     
     @State private var animateP1 = false
     @State private var animateP2 = false
+    @State private var animateFinish = false
+    
+    @AppStorage("longPressEnabled") private var longPressEnabled = true
 
     var maxPoints: Int {
         switch sport {
@@ -33,7 +36,13 @@ struct PointsView: View {
                         Text("P1: \(displayScore(points: pointsP1))")
                             .font(.title2)
 
-                        Button(action: {}) {
+                        Button(action: {
+                            if !longPressEnabled {
+                                incrementP1()
+                                provideHapticFeedback()
+                                animateButton(for: .p1)
+                            }
+                        }) {
                             Text("+")
                                 .font(.largeTitle)
                                 .frame(width: 40, height: 40)
@@ -43,9 +52,11 @@ struct PointsView: View {
                         .simultaneousGesture(
                             LongPressGesture(minimumDuration: 1.0)
                                 .onEnded { _ in
-                                    incrementP1()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p1)
+                                    if longPressEnabled {
+                                        incrementP1()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p1)
+                                    }
                                 }
                         )
                     }
@@ -53,7 +64,13 @@ struct PointsView: View {
                         Text("P2: \(displayScore(points: pointsP2))")
                             .font(.title2)
 
-                        Button(action: {}) {
+                        Button(action: {
+                            if !longPressEnabled {
+                                incrementP2()
+                                provideHapticFeedback()
+                                animateButton(for: .p2)
+                            }
+                        }) {
                             Text("+")
                                 .font(.largeTitle)
                                 .frame(width: 40, height: 40)
@@ -63,9 +80,11 @@ struct PointsView: View {
                         .simultaneousGesture(
                             LongPressGesture(minimumDuration: 1.0)
                                 .onEnded { _ in
-                                    incrementP2()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p2)
+                                    if longPressEnabled {
+                                        incrementP2()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p2)
+                                    }
                                 }
                         )
                     }
@@ -78,24 +97,41 @@ struct PointsView: View {
                 }
                 .padding()
 
-                Button(action: resetMatch) {
+                Button(action: {
+                    if !longPressEnabled {
+                        resetMatch()
+                        provideHapticFeedback()
+                        animateButton(for: .finish)
+                    }
+                }) {
                     Text("Finish")
                         .foregroundColor(.red)
+                        .frame(width: 80, height: 40)
                 }
+                .scaleEffect(animateFinish ? 1.2 : 1.0)
+                .animation(.easeInOut(duration: 0.1), value: animateFinish)
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 2.0)
+                        .onEnded { _ in
+                            if longPressEnabled {
+                                resetMatch()
+                                provideHapticFeedback()
+                                animateButton(for: .finish)
+                            }
+                        }
+                )
                 .padding()
             }
         }
         .navigationTitle("\(sport)")
     }
-    
-    
 
     private func provideHapticFeedback() {
         WKInterfaceDevice.current().play(.success)
     }
 
-    private func animateButton(for player: Player) {
-        switch player {
+    private func animateButton(for button: ButtonType) {
+        switch button {
         case .p1:
             animateP1 = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -106,10 +142,17 @@ struct PointsView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 animateP2 = false
             }
+        case .finish:
+            animateFinish = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                animateFinish = false
+            }
         }
     }
-    
-    
+
+    private enum ButtonType {
+        case p1, p2, finish
+    }
     
 
     private enum Player {
