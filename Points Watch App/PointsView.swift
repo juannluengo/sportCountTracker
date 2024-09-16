@@ -20,6 +20,18 @@ struct PointsView: View {
 
     @AppStorage("longPressEnabled") private var longPressEnabled = true
 
+    // Timer variables
+    @State private var countdown: Int = 3
+    @State private var matchTime: TimeInterval = 0
+    @State private var isCountdownActive: Bool = true
+    @State private var isMatchTimerActive: Bool = false
+    @State private var matchTimer: Timer?
+    @State private var countdownTimer: Timer?
+    @State private var lapTimes: [TimeInterval] = []
+
+    // For countdown animation
+    @State private var countdownProgress: Double = 1.0
+
     // The color of the top rectangle is based on who's winning. A tie is a mix of both
     var topColor: Color {
         if pointsP1 > pointsP2 {
@@ -39,142 +51,203 @@ struct PointsView: View {
         default: return 10
         }
     }
-    
+
     // The score board layout
     var body: some View {
-        ScrollView {
-            VStack(spacing: 10) {
-                // Top rectangle
-                Text("\(setsP1) : \(setsP2)")
-                    .font(.largeTitle)
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(topColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+        if isCountdownActive {
+            // Show the countdown timer with circular animation
+            ZStack {
+                Circle()
+                    .trim(from: 0.0, to: countdownProgress)
+                    .stroke(Color.blue, lineWidth: 10)
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 150, height: 150)
+                    .animation(.linear(duration: 1), value: countdownProgress)
+
+                Text("\(countdown)")
+                    .font(.system(size: 80))
+                    .onAppear {
+                        startCountdownTimer()
+                    }
+            }
+        } else {
+            // Existing UI
+            ScrollView {
+                VStack(spacing: 10) {
+                    // Clock at the top
+                    Text("\(formattedTime(matchTime))")
+                        .font(.footnote)
+                        .padding(.leading, 10)
+                        .padding(.top, 5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Top rectangle
+                    Text("\(setsP1) : \(setsP2)")
+                        .font(.largeTitle)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(topColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding([.leading, .trailing])
+
+                    // Player Rectangles
+                    HStack(spacing: 10) {
+                        // Player 1
+                        VStack {
+                            Spacer()
+                            Text("\(displayScore(points: pointsP1))")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+                                .scaleEffect(animateP1 ? 1.2 : 1.0)
+                                .animation(.easeInOut(duration: 0.1), value: animateP1)
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: 200)
+                        .background(p1Color)
+                        .cornerRadius(10)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onEnded { value in
+                                    if value.translation.height < 0 {
+                                        incrementP1()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p1)
+                                    } else if value.translation.height > 0 {
+                                        decrementP1()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p1)
+                                    }
+                                }
+                        )
+                        .onTapGesture {
+                            incrementP1()
+                            provideHapticFeedback()
+                            animateButton(for: .p1)
+                        }
+
+                        // Player 2
+                        VStack {
+                            Spacer()
+                            Text("\(displayScore(points: pointsP2))")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+                                .scaleEffect(animateP2 ? 1.2 : 1.0)
+                                .animation(.easeInOut(duration: 0.1), value: animateP2)
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: 200)
+                        .background(p2Color)
+                        .cornerRadius(10)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onEnded { value in
+                                    if value.translation.height < 0 {
+                                        incrementP2()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p2)
+                                    } else if value.translation.height > 0 {
+                                        decrementP2()
+                                        provideHapticFeedback()
+                                        animateButton(for: .p2)
+                                    }
+                                }
+                        )
+                        .onTapGesture {
+                            incrementP2()
+                            provideHapticFeedback()
+                            animateButton(for: .p2)
+                        }
+                    }
                     .padding([.leading, .trailing])
+                    .frame(height: 300)
 
-                // Separate rectangles
-                Spacer(minLength: 10)
+                    // Additional clock functionalities
+                    VStack(spacing: 10) {
+                        Text("Match Time: \(formattedTime(matchTime))")
+                            .font(.title2)
+                            .padding()
 
-                // Player Rectangles
-                HStack(spacing: 10) {
-                    // Player 1
-                    VStack {
-                        Spacer()
-                        Text("\(displayScore(points: pointsP1))")
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
-                            .scaleEffect(animateP1 ? 1.2 : 1.0)
-                            .animation(.easeInOut(duration: 0.1), value: animateP1)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: 200)
-                    .background(p1Color)
-                    .cornerRadius(10)
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                if value.translation.height < 0 {
-                                    incrementP1()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p1)
-                                } else if value.translation.height > 0 {
-                                    decrementP1()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p1)
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                if isMatchTimerActive {
+                                    pauseMatchTimer()
+                                } else {
+                                    resumeMatchTimer()
                                 }
+                            }) {
+                                Image(systemName: isMatchTimerActive ? "pause.fill" : "play.fill")
+                                    .font(.title)
                             }
-                    )
-                    .onTapGesture {
-                        incrementP1()
-                        provideHapticFeedback()
-                        animateButton(for: .p1)
-                    }
 
-                    // Player 2
-                    VStack {
-                        Spacer()
-                        Text("\(displayScore(points: pointsP2))")
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
-                            .scaleEffect(animateP2 ? 1.2 : 1.0)
-                            .animation(.easeInOut(duration: 0.1), value: animateP2)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: 200)
-                    .background(p2Color)
-                    .cornerRadius(10)
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                if value.translation.height < 0 {
-                                    incrementP2()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p2)
-                                } else if value.translation.height > 0 {
-                                    decrementP2()
-                                    provideHapticFeedback()
-                                    animateButton(for: .p2)
-                                }
+                            Button(action: {
+                                resetMatchTimer()
+                            }) {
+                                Image(systemName: "arrow.counterclockwise")
+                                    .font(.title)
                             }
-                    )
-                    .onTapGesture {
-                        incrementP2()
-                        provideHapticFeedback()
-                        animateButton(for: .p2)
-                    }
-                }
-                .padding([.leading, .trailing])
-                .frame(height: 300) // This is to make the players rectangles longer
 
-                // This is to push the buttons lower
-                Spacer()
-
-                /*
-                // Undo Button
-                Button(action: redoLastAction) {
-                    Text("Undo")
-                        .foregroundColor(.orange)
-                }
-                .padding()
-                 */
-
-                // Finish Button
-                Button(action: {
-                    if !longPressEnabled {
-                        resetMatch()
-                        provideHapticFeedback()
-                        animateButton(for: .finish)
-                    }
-                }) {
-                    Text("Finish")
-                        .foregroundColor(.red)
-                        .frame(width: 80, height: 40)
-                }
-                .scaleEffect(animateFinish ? 1.2 : 1.0)
-                .animation(.easeInOut(duration: 0.1), value: animateFinish)
-                .simultaneousGesture(
-                    LongPressGesture(minimumDuration: 2.0)
-                        .onEnded { _ in
-                            if longPressEnabled {
-                                resetMatch()
-                                provideHapticFeedback()
-                                animateButton(for: .finish)
+                            Button(action: {
+                                lapTimes.append(matchTime)
+                            }) {
+                                Image(systemName: "flag")
+                                    .font(.title)
                             }
                         }
-                )
-                .padding()
+                        .padding()
+
+                        if !lapTimes.isEmpty {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("Lap Times:")
+                                    .font(.headline)
+                                ForEach(Array(lapTimes.enumerated()), id: \.offset) { index, lap in
+                                    Text("Lap \(index + 1): \(formattedTime(lap))")
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+
+                    // Finish Button at the bottom
+                    Button(action: {
+                        if !longPressEnabled {
+                            resetMatch()
+                            provideHapticFeedback()
+                            animateButton(for: .finish)
+                        }
+                    }) {
+                        Text("Finish")
+                            .foregroundColor(.red)
+                            .frame(width: 80, height: 40)
+                    }
+                    .scaleEffect(animateFinish ? 1.2 : 1.0)
+                    .animation(.easeInOut(duration: 0.1), value: animateFinish)
+                    .simultaneousGesture(
+                        LongPressGesture(minimumDuration: 2.0)
+                            .onEnded { _ in
+                                if longPressEnabled {
+                                    resetMatch()
+                                    provideHapticFeedback()
+                                    animateButton(for: .finish)
+                                }
+                            }
+                    )
+                    .padding(.bottom, 20)
+                }
+                .padding(.top, 10)
+            }
+            .onDisappear {
+                countdownTimer?.invalidate()
+                matchTimer?.invalidate()
             }
         }
-        // .navigationTitle("\(sport)")
     }
 
-    // Haptic feedback (que vibre cuando pinchas)
+    // Haptic feedback
     private func provideHapticFeedback() {
         WKInterfaceDevice.current().play(.success)
     }
 
-    // Animate button (so that is slightly increase to show you that you have pressed it)
+    // Animate button
     private func animateButton(for button: ButtonType) {
         switch button {
         case .p1:
@@ -199,7 +272,7 @@ struct PointsView: View {
         case p1, p2, finish
     }
 
-    // Score display function for Tennis, Padel, and other sports
+    // Score display function
     func displayScore(points: Int) -> String {
         switch sport {
         case "Tennis", "Padel":
@@ -234,7 +307,7 @@ struct PointsView: View {
 
     // Increment logic for Player 1
     func incrementP1() {
-        saveCurrentState() // Save current state before incrementing
+        saveCurrentState()
         switch sport {
         case "Tennis", "Padel":
             incrementTennisPadel(player: 1)
@@ -247,7 +320,7 @@ struct PointsView: View {
 
     // Increment logic for Player 2
     func incrementP2() {
-        saveCurrentState() // Save current state before incrementing
+        saveCurrentState()
         switch sport {
         case "Tennis", "Padel":
             incrementTennisPadel(player: 2)
@@ -281,11 +354,11 @@ struct PointsView: View {
                 winGame(player: 1)
             } else if pointsP1 >= 3 && pointsP2 >= 3 {
                 if pointsP1 == pointsP2 {
-                    pointsP1 += 1 // Move to Advantage P1
+                    pointsP1 += 1
                 } else if pointsP1 > pointsP2 {
                     winGame(player: 1)
                 } else {
-                    pointsP1 += 1 // Back to Deuce
+                    pointsP1 += 1
                 }
             } else {
                 pointsP1 += 1
@@ -295,11 +368,11 @@ struct PointsView: View {
                 winGame(player: 2)
             } else if pointsP2 >= 3 && pointsP1 >= 3 {
                 if pointsP2 == pointsP1 {
-                    pointsP2 += 1 // Move to Advantage P2
+                    pointsP2 += 1
                 } else if pointsP2 > pointsP1 {
                     winGame(player: 2)
                 } else {
-                    pointsP2 += 1 // Back to Deuce
+                    pointsP2 += 1
                 }
             } else {
                 pointsP2 += 1
@@ -309,7 +382,7 @@ struct PointsView: View {
 
     // Increment logic for Badminton, Squash, and Ping Pong
     func incrementBadmintonSquashPingPong(player: Int) {
-        let maxThreshold = sport == "Badminton" ? 20 : 10 // Deuce threshold
+        let maxThreshold = sport == "Badminton" ? 20 : 10
         if player == 1 {
             if pointsP1 >= maxThreshold && pointsP1 - pointsP2 >= 1 {
                 winGame(player: 1)
@@ -340,16 +413,6 @@ struct PointsView: View {
         actionHistory.append((pointsP1: pointsP1, pointsP2: pointsP2, setsP1: setsP1, setsP2: setsP2))
     }
 
-    // Undo last action
-    func redoLastAction() {
-        guard !actionHistory.isEmpty else { return }
-        let lastState = actionHistory.removeLast()
-        pointsP1 = lastState.pointsP1
-        pointsP2 = lastState.pointsP2
-        setsP1 = lastState.setsP1
-        setsP2 = lastState.setsP2
-    }
-
     // Reset points after a game is won
     func resetPoints() {
         pointsP1 = 0
@@ -363,7 +426,55 @@ struct PointsView: View {
         pointsP2 = 0
         setsP1 = 0
         setsP2 = 0
-        actionHistory.removeAll() // Clear history when resetting the match
+        actionHistory.removeAll()
+        resetMatchTimer()
+    }
+
+    // Timer functions
+    func startCountdownTimer() {
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if countdown > 1 {
+                countdown -= 1
+                countdownProgress -= 1 / 3.0
+            } else {
+                countdownTimer?.invalidate()
+                isCountdownActive = false
+                startMatchTimer()
+            }
+        }
+    }
+
+    func startMatchTimer() {
+        isMatchTimerActive = true
+        matchTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            matchTime += 1
+        }
+    }
+
+    func pauseMatchTimer() {
+        isMatchTimerActive = false
+        matchTimer?.invalidate()
+    }
+
+    func resumeMatchTimer() {
+        isMatchTimerActive = true
+        matchTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            matchTime += 1
+        }
+    }
+
+    func resetMatchTimer() {
+        isMatchTimerActive = false
+        matchTimer?.invalidate()
+        matchTime = 0
+        lapTimes.removeAll()
+    }
+
+    // Format time interval to display string
+    func formattedTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 
