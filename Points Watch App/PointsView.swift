@@ -39,7 +39,8 @@ struct PointsView: View {
         default: return 10
         }
     }
-
+    
+    // The score board layout
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
@@ -67,7 +68,7 @@ struct PointsView: View {
                             .animation(.easeInOut(duration: 0.1), value: animateP1)
                         Spacer()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: 200)
                     .background(p1Color)
                     .cornerRadius(10)
                     .gesture(
@@ -100,7 +101,7 @@ struct PointsView: View {
                             .animation(.easeInOut(duration: 0.1), value: animateP2)
                         Spacer()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: 200)
                     .background(p2Color)
                     .cornerRadius(10)
                     .gesture(
@@ -129,12 +130,14 @@ struct PointsView: View {
                 // This is to push the buttons lower
                 Spacer()
 
+                /*
                 // Undo Button
                 Button(action: redoLastAction) {
                     Text("Undo")
                         .foregroundColor(.orange)
                 }
                 .padding()
+                 */
 
                 // Finish Button
                 Button(action: {
