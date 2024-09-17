@@ -435,7 +435,7 @@ struct PointsView: View {
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if countdown > 1 {
                 countdown -= 1
-                countdownProgress -= 1 / 3.0
+                countdownProgress -= 1 / 2.0
             } else {
                 countdownTimer?.invalidate()
                 isCountdownActive = false
