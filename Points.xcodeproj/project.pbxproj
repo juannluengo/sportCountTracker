@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A61714B72CAE7ED800DC7403 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61714B62CAE7ED800DC7403 /* SettingsView.swift */; };
 		A69B258A2CAE7C380043346A /* MatchSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69B25892CAE7C330043346A /* MatchSetupView.swift */; };
 		A6B8C0ED2C8A0147005081D7 /* Points Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A6B8C0EC2C8A0147005081D7 /* Points Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A6B8C0F22C8A0147005081D7 /* PointsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B8C0F12C8A0147005081D7 /* PointsApp.swift */; };
@@ -60,6 +61,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A61714B62CAE7ED800DC7403 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A69B25892CAE7C330043346A /* MatchSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSetupView.swift; sourceTree = "<group>"; };
 		A6B8C0E62C8A0147005081D7 /* Points.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Points.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6B8C0EC2C8A0147005081D7 /* Points Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Points Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,6 +136,7 @@
 				A69B25892CAE7C330043346A /* MatchSetupView.swift */,
 				A6B8C1212C8A018E005081D7 /* HistoryView.swift */,
 				A6B8C1232C8A019A005081D7 /* Match.swift */,
+				A61714B62CAE7ED800DC7403 /* SettingsView.swift */,
 			);
 			path = "Points Watch App";
 			sourceTree = "<group>";
@@ -244,7 +247,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					A6B8C0E52C8A0147005081D7 = {
 						CreatedOnToolsVersion = 15.4;
@@ -321,6 +324,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A61714B72CAE7ED800DC7403 /* SettingsView.swift in Sources */,
 				A6B8C0F42C8A0147005081D7 /* ContentView.swift in Sources */,
 				A6B8C1222C8A018E005081D7 /* HistoryView.swift in Sources */,
 				A69B258A2CAE7C380043346A /* MatchSetupView.swift in Sources */,
@@ -402,6 +406,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -463,6 +468,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -544,7 +550,6 @@
 		A6B8C1172C8A0149005081D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_KEY_CFBundleDisplayName = Points;
@@ -559,7 +564,6 @@
 		A6B8C1182C8A0149005081D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_KEY_CFBundleDisplayName = Points;
@@ -575,7 +579,6 @@
 		A6B8C11A2C8A0149005081D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -595,7 +598,6 @@
 		A6B8C11B2C8A0149005081D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -616,7 +618,6 @@
 		A6B8C11D2C8A0149005081D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -635,7 +636,6 @@
 		A6B8C11E2C8A0149005081D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;

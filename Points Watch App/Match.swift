@@ -1,5 +1,3 @@
-// Match.swift
-
 // Import the Foundation framework for basic types
 import Foundation
 
@@ -7,13 +5,14 @@ import Foundation
 struct Match: Identifiable {
     // Unique identifier for the match
     let id = UUID()
-    // Sport type
-    let sport: String
-    // Points or sets for Player 1 and Player 2
-    let pointsP1: Int
-    let pointsP2: Int
-    var matchType: MatchSetupView.MatchType
-    var avatars: [String]
+    
+    // Match details
+    let sport: String                    // Sport type
+    let pointsP1: Int                    // Points or sets for Player 1
+    let pointsP2: Int                    // Points or sets for Player 2
+    var matchType: MatchSetupView.MatchType // Type of match (1 vs 1 or 2 vs 2)
+    var avatars: [String]                // Avatars representing players
+    
     // Date when the match was recorded
     let date = Date()
 }
@@ -25,13 +24,13 @@ class MatchHistory: ObservableObject {
     
     // Function to add a new match to the history
     func addMatch(_ match: Match) {
-           matches.append(match)
-           if matches.count > 20 {
-               matches.removeFirst() // Remove the oldest match
-           }
-       }
+        matches.append(match)
+        if matches.count > 20 {
+            matches.removeFirst() // Remove the oldest match if the history exceeds 20
+        }
+    }
     
-    // Function to clear the match history
+    // Function to clear all match records from the history
     func clearHistory() {
         matches.removeAll()
     }
