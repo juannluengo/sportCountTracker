@@ -1,15 +1,15 @@
 // PointsView.swift
 
-// Import the SwiftUI framework
 import SwiftUI
 
-// Define the PointsView, which displays the scoring interface for a sport
 struct PointsView: View {
     // The sport selected (passed from ContentView)
     var sport: String
     var matchType: MatchSetupView.MatchType
     var avatars: [String]
-    
+    var isSetOption: Bool?
+    var customSetPoints: Int?
+
     // Access the MatchHistory environment object
     @EnvironmentObject var history: MatchHistory
 
@@ -26,17 +26,18 @@ struct PointsView: View {
     
     // Boolean to check if the sport has no set concept
     var noSet: Bool {
-        return ["Scoreboard", "Football"].contains(sport)
+        if sport == "Custom" {
+            return isSetOption == false
+        } else {
+            return ["Football"].contains(sport)
+        }
     }
-    
+
     // Boolean to check if the device has a large screen
     private let isLargeScreen: Bool = WKInterfaceDevice.current().screenBounds.width > 190
 
     // Action history for undo functionality
     @State private var actionHistory: [(pointsP1: Int, pointsP2: Int, setsP1: Int, setsP2: Int)] = []
-    
-    // Presentation mode environment variable to control view dismissal
-    @Environment(\.presentationMode) var presentationMode
     
     // State variable to control active alerts
     @State private var activeAlert: ActiveAlert?
@@ -61,11 +62,15 @@ struct PointsView: View {
         case "Badminton": return 21
         case "Squash", "Ping Pong": return 11
         case "Tennis", "Padel": return 4
+        case "Custom":
+            return customSetPoints ?? 10
         default: return 10
         }
     }
 
-    // Main body of the PointsView
+    // Navigation path
+    @Binding var path: [Screen]
+
     var body: some View {
         ZStack {
             // Main content
@@ -214,7 +219,7 @@ struct PointsView: View {
             if pointsP1 > 0 || pointsP2 > 0 || setsP1 > 0 || setsP2 > 0 {
                 activeAlert = .back
             } else {
-                presentationMode.wrappedValue.dismiss()
+                path = [] // Go back to ContentView
             }
         }) {
             HStack {
@@ -232,7 +237,7 @@ struct PointsView: View {
                 message: Text("Are you sure you want to end the match?"),
                 primaryButton: .destructive(Text("End Match")) {
                     resetMatch()
-                    presentationMode.wrappedValue.dismiss()
+                    path = [] // Go back to ContentView
                 },
                 secondaryButton: .cancel()
             )
@@ -242,7 +247,7 @@ struct PointsView: View {
                 message: Text("Are you sure you want to end the match and go back?"),
                 primaryButton: .destructive(Text("End Match")) {
                     resetMatch()
-                    presentationMode.wrappedValue.dismiss()
+                    path = [] // Go back to ContentView
                 },
                 secondaryButton: .cancel()
             )
@@ -356,26 +361,58 @@ struct PointsView: View {
     }
 
     func incrementP1() {
-        saveCurrentState()  // Save current state before incrementing
+        saveCurrentState()
         switch sport {
         case "Tennis", "Padel":
             incrementTennisPadel(player: 1)
         case "Badminton", "Squash", "Ping Pong":
             incrementBadmintonSquashPingPong(player: 1)
+        case "Custom":
+            if let isSetOption = isSetOption, isSetOption {
+                incrementCustomSport(player: 1)
+            } else {
+                setsP1 += 1
+            }
         default:
             setsP1 += 1
         }
     }
 
     func incrementP2() {
-        saveCurrentState()  // Save current state before incrementing
+        saveCurrentState()
         switch sport {
         case "Tennis", "Padel":
             incrementTennisPadel(player: 2)
         case "Badminton", "Squash", "Ping Pong":
             incrementBadmintonSquashPingPong(player: 2)
+        case "Custom":
+            if let isSetOption = isSetOption, isSetOption {
+                incrementCustomSport(player: 2)
+            } else {
+                setsP2 += 1
+            }
         default:
             setsP2 += 1
+        }
+    }
+
+    func incrementCustomSport(player: Int) {
+        guard let pointsPerSet = customSetPoints else { return }
+        
+        if player == 1 {
+            pointsP1 += 1  // Increment Player 1's points
+            
+            // Check if Player 1 has enough points to win and leads by at least 2
+            if pointsP1 >= pointsPerSet && (pointsP1 - pointsP2) >= 2 {
+                winGame(player: 1)
+            }
+        } else if player == 2 {
+            pointsP2 += 1  // Increment Player 2's points
+            
+            // Check if Player 2 has enough points to win and leads by at least 2
+            if pointsP2 >= pointsPerSet && (pointsP2 - pointsP1) >= 2 {
+                winGame(player: 2)
+            }
         }
     }
 
@@ -414,13 +451,13 @@ struct PointsView: View {
     func incrementBadmintonSquashPingPong(player: Int) {
         let maxThreshold = sport == "Badminton" ? 20 : 10
         if player == 1 {
-            if pointsP1 >= maxThreshold && pointsP1 - pointsP2 >= 1 {
+            if pointsP1 >= maxThreshold && (pointsP1 - pointsP2) >= 2 {
                 winGame(player: 1)
             } else {
                 pointsP1 += 1
             }
         } else if player == 2 {
-            if pointsP2 >= maxThreshold && pointsP2 - pointsP1 >= 1 {
+            if pointsP2 >= maxThreshold && (pointsP2 - pointsP1) >= 2 {
                 winGame(player: 2)
             } else {
                 pointsP2 += 1
@@ -482,12 +519,16 @@ struct PointsView: View {
 
 // Preview provider for SwiftUI previews
 struct PointsView_Previews: PreviewProvider {
+    @State static var path: [Screen] = []
     static var previews: some View {
         PointsView(
             sport: "Tennis",
-            matchType: .oneVsOne,  // Specify a sample match type
-            avatars: ["person.fill", "person.fill", "person.fill", "person.fill"]  // Provide sample avatars
+            matchType: .oneVsOne,
+            avatars: ["person.fill", "person.fill", "person.fill", "person.fill"],
+            isSetOption: true,
+            customSetPoints: 10,
+            path: $path
         )
-        .environmentObject(MatchHistory())  // Provide the required environment object
+        .environmentObject(MatchHistory())
     }
 }

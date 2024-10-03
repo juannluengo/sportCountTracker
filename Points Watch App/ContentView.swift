@@ -1,13 +1,25 @@
 // ContentView.swift
 
-// Import the SwiftUI framework
 import SwiftUI
 
-// Define the main content view
+// Enum to represent different screens in the navigation stack
+enum Screen: Hashable {
+    case matchSetup(sport: String)
+    case pointsView(
+        sport: String,
+        matchType: MatchSetupView.MatchType,
+        avatars: [String],
+        isSetOption: Bool?,
+        customSetPoints: Int?
+    )
+}
+
 struct ContentView: View {
+    @State private var path = [Screen]()
+    
     // List of sports to display
-    @State private var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "Football", "Scoreboard"]
-    @State private var selectedSports: Set<String> = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "Scoreboard"]
+    @State private var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "Football", "Custom"]
+    @State private var selectedSports: Set<String> = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "Football", "Custom"]
     
     // Mapping each sport to its corresponding color
     let colorMapping: [String: Color] = [
@@ -17,12 +29,11 @@ struct ContentView: View {
         "Squash": .yellow,
         "Padel": .purple,
         "Football": .white,
-        "Scoreboard": .pink
+        "Custom": .pink
     ]
 
     var body: some View {
-        // Navigation view to enable navigation to other views
-        NavigationView {
+        NavigationStack(path: $path) {
             // Scrollable content
             ScrollView {
                 VStack {
@@ -35,8 +46,10 @@ struct ContentView: View {
                     ForEach(sports.filter { selectedSports.contains($0) }, id: \.self) { sport in
                         let color = colorMapping[sport] ?? .gray  // Default to gray if no color is found
 
-                        // Navigation link to match setup view
-                        NavigationLink(destination: MatchSetupView(sport: sport)) {
+                        // Button to navigate to match setup view
+                        Button(action: {
+                            path.append(.matchSetup(sport: sport))
+                        }) {
                             HStack {
                                 // Sport icon
                                 Image(systemName: icon(for: sport))
@@ -109,6 +122,21 @@ struct ContentView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
+            .navigationDestination(for: Screen.self) { screen in
+                switch screen {
+                case .matchSetup(let sport):
+                    MatchSetupView(sport: sport, path: $path)
+                case .pointsView(let sport, let matchType, let avatars, let isSetOption, let customSetPoints):
+                    PointsView(
+                        sport: sport,
+                        matchType: matchType,
+                        avatars: avatars,
+                        isSetOption: isSetOption,
+                        customSetPoints: customSetPoints,
+                        path: $path
+                    )
+                }
+            }
             .navigationBarHidden(true) // Hide the navigation bar
         }
     }
@@ -126,6 +154,10 @@ struct ContentView: View {
             return "figure.tennis"
         case "Padel":
             return "figure.tennis"
+        case "Football":
+            return "soccerball"
+        case "Custom":
+            return "person.3.sequence"
         default:
             return "questionmark.circle"
         }

@@ -1,8 +1,11 @@
+// MatchSetupView.swift
+
 import SwiftUI
 
 struct MatchSetupView: View {
     // The sport selected (passed from ContentView)
     var sport: String
+    @Binding var path: [Screen]
 
     // State variables for match setup
     @State private var matchType: MatchType?
@@ -10,9 +13,12 @@ struct MatchSetupView: View {
     @State private var selectedAvatars: [String] = []
     @State private var availableAvatars: [String] = ["person.circle", "dog.circle", "cat.circle", "fish.circle", "bird.circle", "hare.circle", "tortoise.circle", "ladybug.circle"]
     
+    @State private var isSetOption: Bool?
+    @State private var customSetPoints: Int = 10
+
     var isTeams: Bool {
-           return sport == "Football"
-       }
+        return sport == "Football"
+    }
 
     // Enumeration for match types
     enum MatchType {
@@ -21,7 +27,9 @@ struct MatchSetupView: View {
     }
 
     // Enumeration for match setup steps
-    enum MatchSetupStep: Equatable  {
+    enum MatchSetupStep: Equatable {
+        case chooseSetOption
+        case chooseSetPoints
         case chooseMatchType
         case chooseAvatar(playerNumber: Int)
         case readyToStart
@@ -30,26 +38,115 @@ struct MatchSetupView: View {
     var body: some View {
         VStack {
             switch currentStep {
+            case .chooseSetOption:
+                chooseSetOptionView()
+            case .chooseSetPoints:
+                chooseSetPointsView()
             case .chooseMatchType:
                 chooseMatchTypeView()
-
             case .chooseAvatar(let playerNumber):
                 chooseAvatarView(for: playerNumber)
-
             case .readyToStart:
                 readyToStartView()
             }
         }
         .onAppear {
-            if isTeams && currentStep == .chooseMatchType {
+            if sport == "Custom" {
+                currentStep = .chooseSetOption
+            } else if isTeams && currentStep == .chooseMatchType {
                 currentStep = .chooseAvatar(playerNumber: 1)
                 matchType = .oneVsOne
             }
         }
-
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     // MARK: - UI Components
+
+    // View for choosing between Set and No Set
+    func chooseSetOptionView() -> some View {
+        VStack {
+            Text("Choose Type")
+                .font(.headline)
+                .padding()
+            
+            HStack(spacing: 10) {
+                Button(action: {
+                    isSetOption = true
+                    currentStep = .chooseSetPoints
+                }) {
+                    Text("Set")
+                        .font(.headline)
+                        .padding()
+                        .frame(width: 70, height: 70)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(25)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: {
+                    isSetOption = false
+                    currentStep = .chooseMatchType
+                }) {
+                    Text("No Set")
+                        .font(.headline)
+                        .padding()
+                        .frame(width: 70, height: 70)
+                        .background(Color.green.opacity(0.2))
+                        .cornerRadius(25)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+    }
+
+    // View for choosing the number of points per set
+    func chooseSetPointsView() -> some View {
+        VStack {
+            Text("Points per Set")
+                .font(.headline)
+                .padding()
+            
+            HStack(spacing: 20) {
+                Button(action: {
+                    if customSetPoints > 2 {
+                        customSetPoints -= 1
+                    }
+                }) {
+                    Image(systemName: "minus.circle")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Text("\(customSetPoints)")
+                    .font(.title)
+                
+                Button(action: {
+                    customSetPoints += 1
+                }) {
+                    Image(systemName: "plus.circle")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding()
+            
+            Button(action: {
+                currentStep = .chooseMatchType
+            }) {
+                Text("Next")
+                    .font(.headline)
+                    .padding()
+                    .frame(width: 70, height: 40)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(10)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding()
+        }
+    }
 
     // View for choosing the match type (1 vs 1 or 2 vs 2)
     func chooseMatchTypeView() -> some View {
@@ -161,7 +258,15 @@ struct MatchSetupView: View {
                 .padding()
             }
 
-            NavigationLink(destination: PointsView(sport: sport, matchType: matchType!, avatars: selectedAvatars)) {
+            Button(action: {
+                path.append(.pointsView(
+                    sport: sport,
+                    matchType: matchType!,
+                    avatars: selectedAvatars,
+                    isSetOption: isSetOption,
+                    customSetPoints: customSetPoints
+                ))
+            }) {
                 Text("START")
                     .font(.headline)
                     .foregroundColor(Color.red)
@@ -196,7 +301,8 @@ struct MatchSetupView: View {
 
 // Preview provider for SwiftUI previews
 struct MatchSetupView_Previews: PreviewProvider {
+    @State static var path: [Screen] = []
     static var previews: some View {
-        MatchSetupView(sport: "Tennis")
+        MatchSetupView(sport: "Tennis", path: $path)
     }
 }
