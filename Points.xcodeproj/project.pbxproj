@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A69B258A2CAE7C380043346A /* MatchSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69B25892CAE7C330043346A /* MatchSetupView.swift */; };
 		A6B8C0ED2C8A0147005081D7 /* Points Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A6B8C0EC2C8A0147005081D7 /* Points Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A6B8C0F22C8A0147005081D7 /* PointsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B8C0F12C8A0147005081D7 /* PointsApp.swift */; };
 		A6B8C0F42C8A0147005081D7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B8C0F32C8A0147005081D7 /* ContentView.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A69B25892CAE7C330043346A /* MatchSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSetupView.swift; sourceTree = "<group>"; };
 		A6B8C0E62C8A0147005081D7 /* Points.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Points.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6B8C0EC2C8A0147005081D7 /* Points Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Points Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6B8C0F12C8A0147005081D7 /* PointsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointsApp.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				A6B8C0F52C8A0148005081D7 /* Assets.xcassets */,
 				A6B8C0F72C8A0148005081D7 /* Preview Content */,
 				A6B8C11F2C8A017F005081D7 /* PointsView.swift */,
+				A69B25892CAE7C330043346A /* MatchSetupView.swift */,
 				A6B8C1212C8A018E005081D7 /* HistoryView.swift */,
 				A6B8C1232C8A019A005081D7 /* Match.swift */,
 			);
@@ -320,6 +323,7 @@
 			files = (
 				A6B8C0F42C8A0147005081D7 /* ContentView.swift in Sources */,
 				A6B8C1222C8A018E005081D7 /* HistoryView.swift in Sources */,
+				A69B258A2CAE7C380043346A /* MatchSetupView.swift in Sources */,
 				A6B8C0F22C8A0147005081D7 /* PointsApp.swift in Sources */,
 				A6B8C1242C8A019A005081D7 /* Match.swift in Sources */,
 				A6B8C1202C8A017F005081D7 /* PointsView.swift in Sources */,
