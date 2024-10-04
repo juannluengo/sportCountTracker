@@ -7,11 +7,14 @@ struct SettingsView: View {
     
     // State variable to control the display of the MenuView
     @State private var showMenuView = false
+    // State variable to control the display of the MenuView
+    @State private var showColorThemeView = false
 
     var body: some View {
         VStack {
             // Menu view button
             menuViewButton()
+            colorTheme()
             
             Spacer() // Pushes content to the top
         }
@@ -42,6 +45,27 @@ struct SettingsView: View {
             MenuView(sports: $sports, selectedSports: $selectedSports)
         }
     }
+    
+    // Button for displaying the Color Theme
+    func colorTheme() -> some View {
+            HStack {
+                Text("Choose Theme")
+                    .font(.system(size: 14))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+            }
+            .padding()
+            .padding(.vertical, 6)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
+            .onTapGesture {
+                showColorThemeView = true
+            }
+            .sheet(isPresented: $showColorThemeView) {
+                ColorThemeSelectionView()
+            }
+        }
 }
 
 // Define the MenuView to manage the sports selection and reordering
@@ -53,7 +77,8 @@ struct MenuView: View {
     var isSmallScreen: Bool {
         WKInterfaceDevice.current().screenBounds.width < 170
     }
-
+    
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -70,6 +95,8 @@ struct MenuView: View {
         .padding()
         .edgesIgnoringSafeArea(.bottom) // Ignore bottom safe area to allow full scrolling
     }
+    
+    
     
     // MARK: - UI Components
 
@@ -129,12 +156,57 @@ struct MenuView: View {
     }
 }
 
+// Define a simple ColorThemeSelectionView for choosing light or dark mode
+struct ColorThemeSelectionView: View {
+    // Enum representing available color themes
+    enum ColorTheme: String, CaseIterable, Identifiable {
+        case light = "Light Mode"
+        case dark = "Dark Mode"
+        
+        var id: String { self.rawValue }
+    }
+    
+    // Persist the selected theme using @AppStorage
+    @AppStorage("selectedColorTheme") private var selectedColorTheme: ColorTheme = .light
+    
+    var body: some View {
+        VStack {
+            Text("Select Theme")
+                .font(.headline)
+                .padding(.top)
+            
+            List {
+                ForEach(ColorTheme.allCases) { theme in
+                    Button(action: {
+                        selectedColorTheme = theme
+                    }) {
+                        HStack {
+                            Text(theme.rawValue)
+                                .font(.body)
+                            Spacer()
+                            if selectedColorTheme == theme {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            .listStyle(CarouselListStyle()) // Suitable for watchOS
+            
+        }
+        .padding(.horizontal)
+    }
+}
+
 // Preview provider for SwiftUI previews
 struct SettingsView_Previews: PreviewProvider {
-    @State static var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel", "Scoreboard"]
-    @State static var selectedSports: Set<String> = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel"]
+    @State static var sports = ["Tennis", "Badminton", "Ping Pong", "Squash", "Padel"]
+    @State static var selectedSports: Set<String> = ["Tennis", "Badminton"]
 
     static var previews: some View {
         SettingsView(sports: $sports, selectedSports: $selectedSports)
     }
+    
 }
