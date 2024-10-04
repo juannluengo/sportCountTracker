@@ -151,9 +151,9 @@ struct ContentView: View {
         case "Ping Pong":
             return "figure.table.tennis"
         case "Squash":
-            return "figure.tennis"
+            return "figure.squash"
         case "Padel":
-            return "figure.tennis"
+            return "tennisball.fill"
         case "Football":
             return "soccerball"
         case "Custom":
