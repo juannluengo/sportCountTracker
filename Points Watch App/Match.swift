@@ -23,10 +23,11 @@ class MatchHistory: ObservableObject {
     @Published var matches: [Match] = []
     
     // Function to add a new match to the history
+
     func addMatch(_ match: Match) {
-        matches.append(match)
-        if matches.count > 20 {
-            matches.removeFirst() // Remove the oldest match if the history exceeds 20
+        matches.insert(match, at: 0) // Insert the new match at the beginning
+        if matches.count > 15 {
+            matches.removeLast() // Remove the oldest match
         }
     }
     

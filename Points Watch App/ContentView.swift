@@ -1,5 +1,3 @@
-// ContentView.swift
-
 import SwiftUI
 
 // Enum to represent different screens in the navigation stack
@@ -34,94 +32,105 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            // Scrollable content
-            ScrollView {
-                VStack {
-                    // Title text
-                    Text("SELECT SPORT")
-                        .font(.headline)
-                        .padding()
+            // List content
+            List {
+                // Title text
+                Text("SELECT SPORT")
+                    .font(.headline)
+                    .padding()
+                    .listRowBackground(Color.clear) // Remove default list row background
+                
+                // Display the list of sports, filtered by the selected sports
+                ForEach(sports.filter { selectedSports.contains($0) }, id: \.self) { sport in
+                    let color = colorMapping[sport] ?? .gray  // Default to gray if no color is found
 
-                    // Display the list of sports, filtered by the selected sports
-                    ForEach(sports.filter { selectedSports.contains($0) }, id: \.self) { sport in
-                        let color = colorMapping[sport] ?? .gray  // Default to gray if no color is found
-
-                        // Button to navigate to match setup view
-                        Button(action: {
-                            path.append(.matchSetup(sport: sport))
-                        }) {
-                            HStack {
-                                // Sport icon
-                                Image(systemName: icon(for: sport))
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 24, height: 24)
-                                    .foregroundColor(color)
-                                    .padding(.leading, 20)
-
-                                // Sport name
-                                Text(sport)
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(color)
-                                    .padding(.leading, 10)
-                            }
-                            .padding(.vertical, 20)
-                            .background(color.opacity(0.2))
-                            .cornerRadius(20)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-
-                    // Navigation link to HistoryView
-                    NavigationLink(destination: HistoryView()) {
+                    // Button to navigate to match setup view
+                    Button(action: {
+                        path.append(.matchSetup(sport: sport))
+                    }) {
                         HStack {
-                            // History icon
-                            Image(systemName: "clock.arrow.circlepath")
+                            // Sport icon
+                            Image(systemName: icon(for: sport))
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 24, height: 24)
-                                .foregroundColor(.green) // Matching color scheme
+                                .foregroundColor(color)
                                 .padding(.leading, 20)
 
-                            // History text
-                            Text("History")
+                            // Sport name
+                            Text(sport)
                                 .font(.headline)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.green)
+                                .foregroundColor(color)
                                 .padding(.leading, 10)
                         }
-                        .padding(.vertical, 20)
-                        .background(Color.green.opacity(0.2)) // Matching background style
-                        .cornerRadius(20)
+                        .padding(.vertical, 35)
                     }
-                    .buttonStyle(PlainButtonStyle())
-
-                    // Navigation link to SettingsView
-                    NavigationLink(destination: SettingsView(sports: $sports, selectedSports: $selectedSports)) {
-                        HStack {
-                            // Settings icon
-                            Image(systemName: "gear")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24)
-                                .foregroundColor(.gray) // Matching color scheme
-                                .padding(.leading, 20)
-
-                            // Settings text
-                            Text("Settings")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.gray)
-                                .padding(.leading, 10)
-                        }
-                        .padding(.vertical, 20)
-                        .background(Color.gray.opacity(0.2)) // Matching background style
-                        .cornerRadius(20)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(maxWidth: .infinity) // Ensure full width
+                    .background(color.opacity(0.2))
+                    .cornerRadius(20) // Apply rounded corners
+                    .listRowInsets(EdgeInsets()) // Remove default list row padding
+                    .listRowBackground(Color.clear) // Use clear background to keep custom styling
                 }
+
+                // Navigation link to HistoryView
+                NavigationLink(destination: HistoryView()) {
+                    HStack {
+                        // History icon
+                        Image(systemName: "clock.arrow.circlepath")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.green) // Matching color scheme
+                            .padding(.leading, 20)
+
+                        // History text
+                        Text("History")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.green)
+                            .padding(.leading, 10)
+                    }
+                    .padding(.vertical, 35)
+                }
+                .frame(maxWidth: .infinity) // Ensure full width
+                .background(Color.green.opacity(0.2))
+                .cornerRadius(20) // Apply rounded corners
+                .listRowInsets(EdgeInsets()) // Remove default list row padding
+                .listRowBackground(Color.clear) // Use clear background to keep custom styling
+
+                // Navigation link to SettingsView
+                NavigationLink(destination: SettingsView(sports: $sports, selectedSports: $selectedSports)) {
+                    HStack {
+                        // Settings icon
+                        Image(systemName: "gear")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.gray) // Matching color scheme
+                            .padding(.leading, 25)
+
+                        // Settings text
+                        Text("Settings")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                    }
+                    .padding(.vertical, 35)
+                }
+                .frame(maxWidth: .infinity) // Ensure full width
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(20) // Apply rounded corners
+                .listRowInsets(EdgeInsets()) // Remove default list row padding
+                .listRowBackground(Color.clear) // Use clear background to keep custom styling
+
+                // Add subtle extra spacing to scroll the Settings button to the middle
+                Spacer()
+                    .frame(height: 50) // Reduced spacing
+                    .listRowBackground(Color.clear) // Use clear background to keep custom styling
             }
+            .listStyle(CarouselListStyle()) // Apply carousel style
             .navigationDestination(for: Screen.self) { screen in
                 switch screen {
                 case .matchSetup(let sport):

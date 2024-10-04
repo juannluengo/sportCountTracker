@@ -34,12 +34,14 @@ struct HistoryView: View {
     }
 
     // View for displaying the list of matches grouped by date
-    func matchHistoryView() -> some View {
-        let groupedMatches = Dictionary(grouping: history.matches, by: { formattedDate(from: $0.date) })
 
+    func matchHistoryView() -> some View {
+        // Group matches by date and sort each group by newest match
+        let groupedMatches = Dictionary(grouping: history.matches.prefix(15).sorted(by: { $0.date > $1.date }), by: { formattedDate(from: $0.date) })
+        
         return VStack {
             // Loop through each date group
-            ForEach(groupedMatches.keys.sorted(), id: \.self) { date in
+            ForEach(groupedMatches.keys.sorted(by: { $0 > $1 }), id: \.self) { date in
                 dateSectionView(date: date, matches: groupedMatches[date] ?? [])
             }
 
@@ -47,6 +49,7 @@ struct HistoryView: View {
         }
     }
 
+    
     // View for displaying a section for each date
     func dateSectionView(date: String, matches: [Match]) -> some View {
         VStack(alignment: .center) { // Center date groups
@@ -157,3 +160,5 @@ struct HistoryView: View {
         return formatter.string(from: date)
     }
 }
+
+
